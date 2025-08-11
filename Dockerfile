@@ -1,33 +1,22 @@
-# Dockerfile
+# Dockerfile (Versi Rencana Darurat)
 
-# --- Tahap 1: Instalasi dependensi ---
-# Menggunakan image resmi Bun sebagai dasar
-FROM oven/bun:1 as deps
+# Tahap 1: Gunakan image Bun terbaru
+FROM oven/bun:1
 WORKDIR /usr/src/app
 
-# Salin file dependensi dan install
-COPY package.json bun.lockb ./
-RUN bun install --frozen-lockfile
+# Salin HANYA package.json
+COPY package.json ./
 
-# --- Tahap 2: Build aplikasi ---
-# Mulai dari tahap dependensi sebelumnya
-FROM deps as builder
-WORKDIR /usr/src/app
+# Jalankan instalasi tanpa --frozen-lockfile. 
+# Ini akan membuat lockfile di dalam container, BUKAN dari komputermu.
+RUN bun install
 
-# Salin semua file proyek
+# Salin sisa kode proyekmu
 COPY . .
 
-# Generate Prisma Client agar tersedia di dalam container
-# Ini adalah langkah krusial
+# Generate Prisma Client
 RUN bunx prisma generate
 
-# --- Tahap 3: Final image untuk produksi ---
-# Gunakan image yang sama untuk produksi
-FROM builder as production
-WORKDIR /usr/src/app
-
-# Set environment variable untuk Node.js/Bun
+# Set environment dan jalankan aplikasi
 ENV NODE_ENV=production
-
-# Perintah untuk menjalankan aplikasi saat container dimulai
 CMD ["bun", "run", "src/index.ts"]
