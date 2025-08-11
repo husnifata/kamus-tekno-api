@@ -1,36 +1,31 @@
-# Dockerfile - Percobaan Final dengan System Dependencies
-
-FROM oven/bun:1 as base
+# --- base (samakan versi dengan lokal)
+FROM oven/bun:1.2.20 AS base
 WORKDIR /usr/src/app
 
-# Pindah ke user root untuk meng-install package sistem
+# Prisma & native addons
 USER root
-# Install package yang sering dibutuhkan oleh Prisma
-RUN apt-get update && apt-get install -y openssl libssl-dev
-
-# Kembali ke user bun yang lebih aman
+RUN apt-get update && apt-get install -y \
+  openssl libssl-dev ca-certificates git python3 build-essential \
+  && rm -rf /var/lib/apt/lists/*
 USER bun
 
-#----------------------------------------------------
-
-FROM base as deps
+# --- deps: install dari lockfile teks
+FROM base AS deps
 WORKDIR /usr/src/app
-
-# Salin file dependensi dan install
 COPY --chown=bun:bun package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
-#----------------------------------------------------
-
-FROM deps as builder
+# --- build
+FROM deps AS builder
 WORKDIR /usr/src/app
-
 COPY --chown=bun:bun . .
+# Prisma: generate client (pakai binary yg sudah diinstall di deps)
 RUN bunx prisma generate
 
-#----------------------------------------------------
-
-FROM builder as production
+# --- production
+FROM base AS production
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app ./
 CMD ["bun", "run", "src/index.ts"]
