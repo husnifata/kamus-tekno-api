@@ -1,0 +1,25 @@
+{
+  "name": "kamus-tekno-api",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.2",
+    "@prisma/client": "^6.13.0",
+    "hono": "^4.9.0",
+    "prisma": "^6.13.0",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "start": "bun src/index.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "postinstall": "prisma generate"
+  }
+}
