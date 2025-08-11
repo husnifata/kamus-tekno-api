@@ -1,4 +1,4 @@
-# --- base (samakan versi dengan lokal)
+# --- base: samakan versi dengan lokal (1.2.20)
 FROM oven/bun:1.2.20 AS base
 WORKDIR /usr/src/app
 
@@ -13,13 +13,14 @@ USER bun
 FROM base AS deps
 WORKDIR /usr/src/app
 COPY --chown=bun:bun package.json bun.lock ./
-RUN bun install
+# debug: pastikan lockfile memang ada di dalam image
+RUN ls -la && test -f bun.lock
+RUN bun install --frozen-lockfile
 
 # --- build
 FROM deps AS builder
 WORKDIR /usr/src/app
 COPY --chown=bun:bun . .
-# Prisma: generate client (pakai binary yg sudah diinstall di deps)
 RUN bunx prisma generate
 
 # --- production
