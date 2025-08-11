@@ -17,7 +17,7 @@ FROM base as deps
 WORKDIR /usr/src/app
 
 # Salin file dependensi dan install
-COPY --chown=bun:bun package.json bun.lockb ./
+COPY --chown=bun:bun package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
 #----------------------------------------------------
