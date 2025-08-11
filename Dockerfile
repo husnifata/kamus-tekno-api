@@ -13,7 +13,7 @@ USER bun
 FROM base AS deps
 WORKDIR /usr/src/app
 COPY --chown=bun:bun package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # --- build
 FROM deps AS builder
